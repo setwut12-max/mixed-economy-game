@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>เมืองเศรษฐกิจผสม – เกมเศรษฐศาสตร์ ม.5</title>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;user-select:none;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{font-family:'Kanit','Noto Sans Thai',sans-serif;background:#16113a;color:#fff;display:flex;justify-content:center;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+#app{width:100%;max-width:560px;height:100%;display:flex;flex-direction:column;position:relative}
+#hud{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;font-weight:600;font-size:15px}
+#hud b{color:#ffd23f}
+#q{min-height:62px;margin:0 10px;padding:8px 14px;background:#fff7dc;color:#2a1a5e;border-radius:16px;font-size:15px;line-height:1.35;text-align:center;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 0 #ff9f1c}
+#world{position:relative;flex:1;margin-top:10px;overflow:hidden;background:linear-gradient(#59c3ff 0,#c6f0ff 22%,#2b1d63 22%)}
+#city{position:absolute;left:0;right:0;top:calc(22% - 32px);text-align:center;font-size:26px;letter-spacing:4px;white-space:nowrap}
+#sun{position:absolute;right:12%;top:2%;font-size:34px}
+svg.fl{position:absolute;left:0;top:22%;width:100%;height:78%}
+.card{position:absolute;width:104px;padding:8px 6px;border-radius:14px;text-align:center;font-weight:600;font-size:14px;line-height:1.2;color:#2a1a5e;background:#fff;border:3px solid #ffd23f;box-shadow:0 6px 0 #c98a00,0 12px 14px #0006;transform-origin:50% 50%;will-change:transform,top,left}
+.card.ok{background:#8cf5a8;border-color:#1fa54a;box-shadow:0 6px 0 #14803a,0 0 24px #8cf5a8}
+.card.no{opacity:.35;filter:grayscale(1)}
+.coin{position:absolute;font-size:34px;filter:drop-shadow(0 6px 4px #0006)}
+#hero{position:absolute;bottom:5%;width:90px;height:120px;perspective:520px;transition:left .14s ease-out;margin-left:-45px}
+.rig{position:relative;width:60px;height:110px;margin:6px 15px;transform-style:preserve-3d;animation:run .5s infinite ease-in-out;transform:scale(1.1)}
+@keyframes run{0%,100%{transform:scale(1.1) translateY(0) rotateY(-16deg)}50%{transform:scale(1.1) translateY(-9px) rotateY(16deg)}}
+.cube{position:absolute;transform-style:preserve-3d}
+.cube i{position:absolute}
+.sw{transform-origin:50% 0;animation:sw .5s infinite alternate ease-in-out}
+.sw.b{animation-direction:alternate-reverse}
+@keyframes sw{from{transform:rotateX(-38deg)}to{transform:rotateX(38deg)}}
+#hero.jump .rig{animation:jump .5s ease-out}
+@keyframes jump{0%{transform:scale(1.1) translateY(0) rotateY(0)}50%{transform:scale(1.1) translateY(-40px) rotateY(360deg)}100%{transform:scale(1.1) translateY(0) rotateY(720deg)}}
+#hero.hit .rig{animation:hit .4s}
+@keyframes hit{0%,100%{transform:scale(1.1) rotateZ(0)}25%{transform:scale(1.1) rotateZ(-18deg)}75%{transform:scale(1.1) rotateZ(18deg)}}
+#fb{position:absolute;left:0;right:0;top:30%;text-align:center;font-size:22px;font-weight:800;text-shadow:0 3px 0 #0008;pointer-events:none;opacity:0;transition:opacity .2s;padding:0 12px}
+#pad{display:flex;gap:8px;padding:8px 10px}
+#pad button{flex:1;height:54px;border:0;border-radius:14px;font:800 24px 'Kanit',sans-serif;color:#2a1a5e;background:#ffd23f;box-shadow:0 5px 0 #c98a00}
+#pad button:active{transform:translateY(4px);box-shadow:0 1px 0 #c98a00}
+#ov{position:absolute;inset:0;background:#16113aee;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;gap:12px;z-index:5}
+#ov h1{font-size:30px;line-height:1.15;font-weight:800;color:#ffd23f}
+#ov p{font-size:15px;line-height:1.5;max-width:420px}
+#ov .big{font-size:42px}
+#ov button{border:0;border-radius:16px;padding:12px 30px;font:800 20px 'Kanit',sans-serif;color:#2a1a5e;background:#ffd23f;box-shadow:0 5px 0 #c98a00;margin-top:6px}
+#ov button:focus-visible,#pad button:focus-visible{outline:3px solid #fff;outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.rig,.sw{animation:none}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="hud"><span id="stg">ด่าน 1/3</span><span>คะแนน <b id="sc">0</b></span><span>คอมโบ <b id="cb">x0</b></span><span id="lv">❤️❤️❤️</span></div>
+  <div id="q">กดเริ่มเกมเพื่อออกวิ่ง</div>
+  <div id="world">
+    <div id="sun">☀️</div><div id="city">🌾🏭🏬🏥🏫🏦</div>
+    <svg class="fl" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+      <polygon points="35,0 65,0 101,100 -1,100" fill="#4a3499"/>
+      <g stroke="#ffd23f" stroke-width=".8" stroke-dasharray="4 3" vector-effect="non-scaling-stroke"><line x1="45" y1="0" x2="33" y2="100"/><line x1="55" y1="0" x2="67" y2="100"/></g>
+      <g stroke="#ffffff55" vector-effect="non-scaling-stroke"><line x1="35" y1="0" x2="-1" y2="100"/><line x1="65" y1="0" x2="101" y2="100"/></g>
+    </svg>
+    <div id="items"></div>
+    <div id="hero"><div class="rig" id="rig"></div></div>
+    <div id="fb"></div>
+    <div id="ov"></div>
+  </div>
+  <div id="pad"><button id="bl" aria-label="เลนซ้าย">◀</button><button id="bm" aria-label="เลนกลาง">●</button><button id="br" aria-label="เลนขวา">▶</button></div>
+</div>
+<script>
+const $=s=>document.querySelector(s);
+const STAGES=[
+ {n:'ระบบเศรษฐกิจ 3 แบบ',c:['ทุนนิยม','สังคมนิยม','เศรษฐกิจผสม'],q:[
+  ['เอกชนเป็นเจ้าของปัจจัยการผลิต ใช้กลไกราคา มุ่งแสวงหากำไร',0],
+  ['รัฐเป็นเจ้าของปัจจัยการผลิตส่วนใหญ่ และวางแผนจากส่วนกลาง',1],
+  ['ทั้งเอกชนและรัฐร่วมกันดำเนินกิจกรรม เช่น มีทั้ง 7-Eleven และ กฟผ.',2],
+  ['ประชาชนเลือกอาชีพและแข่งขันอย่างเสรี รัฐแทรกแซงน้อยที่สุด',0],
+  ['ประเทศไทยใช้ระบบเศรษฐกิจแบบใด',2]]},
+ {n:'ปัญหาพื้นฐานทางเศรษฐกิจ',c:['ผลิตอะไร','ผลิตอย่างไร','ผลิตเพื่อใคร'],q:[
+  ['เกษตรกรเลือกว่าจะปลูกข้าวหรือยางพารา',0],
+  ['โรงงานเลือกใช้เครื่องจักรหรือแรงงานคนในการผลิต',1],
+  ['สินค้าที่ผลิตได้จะจำหน่ายและแบ่งปันให้กลุ่มใด',2],
+  ['ร้านกาแฟตัดสินใจว่าจะขายกาแฟหรือชานม',0],
+  ['เลือกใช้เทคโนโลยีใหม่เพื่อลดต้นทุนการผลิต',1]]},
+ {n:'บทบาทรัฐและเอกชน',c:['ภาครัฐ','ภาคเอกชน','ทั้งสองภาค'],q:[
+  ['จัดบริการไฟฟ้าและน้ำประปาพื้นฐานให้ประชาชน',0],
+  ['ร้านสะดวกซื้อและห้างสรรพสินค้า',1],
+  ['โรงพยาบาลที่มีทั้งแบบรัฐและเอกชนให้เลือกใช้',2],
+  ['เก็บภาษีและออกกฎหมายคุ้มครองผู้บริโภค',0],
+  ['โรงเรียนที่มีทั้งแบบรัฐและเอกชนเปิดสอน',2]]}
+];
+const S={};let ctx,best=0;
+try{best=+localStorage.getItem('ecoBest')||0}catch(e){}
+function beep(f,d,t){try{ctx=ctx||new (window.AudioContext||window.webkitAudioContext)();const o=ctx.createOscillator(),g=ctx.createGain();o.type=t||'square';o.frequency.value=f;g.gain.value=.06;o.connect(g);g.connect(ctx.destination);o.start();g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+d);o.stop(ctx.currentTime+d)}catch(e){}}
+/* 3D cube builder */
+function cube(w,h,d,c,x,y,z,cls){
+  const e=document.createElement('div');e.className='cube'+(cls?' '+cls:'');
+  e.style.cssText=`width:${w}px;height:${h}px;left:${x}px;top:${y}px;transform:translateZ(${z||0}px)`;
+  [[`translateZ(${d/2}px)`,w,h,1],[`rotateY(180deg) translateZ(${d/2}px)`,w,h,.65],[`rotateY(90deg) translateZ(${w/2}px)`,d,h,.82],[`rotateY(-90deg) translateZ(${w/2}px)`,d,h,.82],[`rotateX(90deg) translateZ(${h/2}px)`,w,d,1.2],[`rotateX(-90deg) translateZ(${h/2}px)`,w,d,.6]].forEach(([t,fw,fh,b])=>{
+    const f=document.createElement('i');f.style.cssText=`width:${fw}px;height:${fh}px;left:${(w-fw)/2}px;top:${(h-fh)/2}px;background:${c};filter:brightness(${b});transform:${t}`;e.appendChild(f)});
+  return e}
+(function buildHero(){const r=$('#rig'),sk='#ffcf9f';
+  r.append(cube(14,32,14,'#264653',14,74,0,'sw'),cube(14,32,14,'#264653',32,74,0,'sw b'),
+   cube(36,40,22,'#2a9d8f',12,34,0),cube(10,36,12,sk,0,36,0,'sw b'),cube(10,36,12,sk,50,36,0,'sw'),
+   cube(34,34,30,sk,13,0,0),cube(38,12,34,'#e63946',11,-6,0),cube(30,5,14,'#c1121f',17,2,24),
+   cube(5,7,2,'#111',22,16,15),cube(5,7,2,'#111',37,16,15),cube(14,14,3,'#ffd23f',23,44,12))})();
+/* game */
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+const LX=(l,y)=>50+(l-1)*(10+24*y), TOP=y=>22+y*78;
+function hud(){$('#stg').textContent=`ด่าน ${S.s+1}/3`;$('#sc').textContent=S.score;$('#cb').textContent='x'+S.combo;$('#lv').textContent='❤️'.repeat(S.lives)+'🖤'.repeat(3-S.lives)}
+function setLane(l){S.lane=Math.max(0,Math.min(2,l));$('#hero').style.left=LX(S.lane,.86)+'%'}
+function ov(html,btn,fn){const o=$('#ov');o.innerHTML=html+`<button id="go">${btn}</button>`;o.style.display='flex';$('#go').onclick=()=>{o.style.display='none';beep(660,.12);fn()};$('#go').focus()}
+function newGame(){Object.assign(S,{s:0,w:0,score:0,lives:3,combo:0,right:0,tr:0,items:[],on:false});startStage()}
+function startStage(){S.w=0;S.right=0;$('#items').innerHTML='';S.items=[];hud();setLane(1);
+  $('#q').textContent=`ด่าน ${S.s+1}: ${STAGES[S.s].n}`;
+  ov(`<div class="big">${['🏪','🌾','🏛️'][S.s]}</div><h1>ด่าน ${S.s+1}: ${STAGES[S.s].n}</h1><p>ตัวละครวิ่งอยู่ ให้ย้ายเลนไปเก็บ <b>การ์ดคำตอบที่ถูกต้อง</b> และเก็บเหรียญ 🪙 เพิ่มคะแนน ตอบผิดเสียหัวใจ</p><p>เลือกจาก: ${STAGES[S.s].c.join(' / ')}</p>`,'พร้อมลุย!',()=>{S.on=true;S.last=performance.now();setTimeout(spawn,300)})}
+function spawn(){
+  if(!S.on)return;const st=STAGES[S.s],q=st.q[S.w],perm=shuffle([0,1,2]);
+  $('#q').textContent=q[0];S.cards=[];
+  perm.forEach((ci,l)=>{const e=document.createElement('div');e.className='card';e.textContent=st.c[ci];$('#items').appendChild(e);const it={e,l,y:0,t:'c',ok:ci===q[1],ans:st.c[q[1]]};S.items.push(it);S.cards.push(it)});
+  [0,1].forEach(k=>{if(Math.random()<.7||k==0){const e=document.createElement('div');e.className='coin';e.textContent='🪙';$('#items').appendChild(e);S.items.push({e,l:Math.random()*3|0,y:-.3-k*.28,t:'k'})}});
+  S.judged=false}
+function place(it){const y=it.y;if(y<0){it.e.style.display='none';return}it.e.style.display='';
+  const sc=.42+.75*y;it.e.style.left=LX(it.l,y)+'%';it.e.style.top=TOP(y)+'%';it.e.style.transform=`translate(-50%,-50%) scale(${sc})`;it.e.style.zIndex=Math.round(y*10)}
+function say(t,c){const f=$('#fb');f.textContent=t;f.style.color=c;f.style.opacity=1;clearTimeout(S.ft);S.ft=setTimeout(()=>f.style.opacity=0,1100)}
+function anim(c){const h=$('#hero');h.classList.remove('jump','hit');void h.offsetWidth;h.classList.add(c)}
+function judge(){S.judged=true;S.tr++;const mine=S.cards.find(c=>c.l===S.lane);
+  S.cards.forEach(c=>c.e.classList.add(c.ok?'ok':'no'));
+  if(mine.ok){S.right++;S.combo++;S.score+=100+S.combo*10;beep(880,.15);setTimeout(()=>beep(1175,.2),110);say(`✅ ถูกต้อง! คอมโบ x${S.combo}`,'#8cf5a8');anim('jump')}
+  else{S.lives--;S.combo=0;beep(180,.35,'sawtooth');say(`❌ คำตอบคือ “${mine.ans}”`,'#ff8f8f');anim('hit')}
+  hud()}
+function loop(t){requestAnimationFrame(loop);if(!S.on)return;const dt=Math.min(.05,(t-S.last)/1000);S.last=t;
+  const sp=.2+.04*S.s;
+  for(const it of S.items){it.y+=sp*dt;place(it);
+    if(it.t==='k'&&!it.got&&it.y>.8&&it.y<.93&&it.l===S.lane){it.got=true;it.e.style.display='none';S.score+=10;beep(1400,.08,'triangle');hud()}}
+  if(S.cards&&S.cards.length&&!S.judged&&S.cards[0].y>=.86)judge();
+  S.items=S.items.filter(it=>{if(it.y>1.12||it.got){it.e.remove();return false}return true});
+  if(S.judged&&!S.items.some(i=>i.t==='c')){S.judged=false;S.cards=[];S.on=false;
+    if(S.lives<=0)return over(false);
+    S.w++;if(S.w>=5)return stageEnd();
+    setTimeout(()=>{S.on=true;S.last=performance.now();spawn()},500)}}
+function stars(){return S.right>=5?3:S.right>=3?2:1}
+function stageEnd(){const n=stars();S.score+=n*50;hud();const last=S.s===2;
+  ov(`<div class="big">${'⭐'.repeat(n)}${'☆'.repeat(3-n)}</div><h1>ผ่านด่าน ${S.s+1}!</h1><p>ตอบถูก ${S.right}/5 ข้อ โบนัสดาว +${n*50}</p><p>คะแนนรวม ${S.score}</p>`,last?'ดูผลสรุป':'ด่านต่อไป',()=>{if(last)over(true);else{S.s++;startStage()}})}
+function over(win){S.on=false;let nb='';if(S.score>best){best=S.score;nb=' 🎉 สถิติใหม่!';try{localStorage.setItem('ecoBest',best)}catch(e){}}
+  const r=S.tr?S.rights:0,tot=S.s*5+S.w,rank=!win?'ยังไม่หมดหวัง ลองใหม่อีกครั้ง':S.score>=1500?'นักเศรษฐศาสตร์มือทอง 🏆':S.score>=1000?'ผู้จัดการเศรษฐกิจฝีมือดี 💼':'นักเศรษฐศาสตร์ฝึกหัด 📘';
+  ov(`<div class="big">${win?'🏆':'💔'}</div><h1>${win?'จบเกม!':'หัวใจหมด'}</h1><p>${rank}</p><p>คะแนน <b>${S.score}</b> · สถิติสูงสุด ${best}${nb}</p><p>สรุป: ไทยใช้<b>เศรษฐกิจผสม</b> เอกชนและรัฐทำหน้าที่ร่วมกันเพื่อตอบปัญหา ผลิตอะไร ผลิตอย่างไร ผลิตเพื่อใคร</p>`,'เล่นใหม่',newGame)}
+/* controls */
+addEventListener('keydown',e=>{if(!S.on)return;const k=e.key;if(k==='ArrowLeft'||k==='a')setLane(S.lane-1);if(k==='ArrowRight'||k==='d')setLane(S.lane+1);if(k==='ArrowDown')setLane(1)});
+$('#bl').onclick=()=>setLane(S.lane-1);$('#br').onclick=()=>setLane(S.lane+1);$('#bm').onclick=()=>setLane(1);
+$('#world').addEventListener('pointerdown',e=>{if(!S.on)return;const r=$('#world').getBoundingClientRect();setLane(Math.min(2,Math.max(0,Math.floor((e.clientX-r.left)/r.width*3))))});
+S.s=0;S.lives=3;S.score=0;S.combo=0;S.items=[];S.lane=1;setLane(1);hud();
+ov(`<div class="big">🏙️</div><h1>เมืองเศรษฐกิจผสม</h1><p>วิ่งผ่านเมืองเศรษฐกิจ เก็บคำตอบที่ถูก เก็บเหรียญ แล้วพิสูจน์ว่าคุณเข้าใจระบบเศรษฐกิจแบบผสม!</p><p>ควบคุม: ปุ่ม ← → หรือแตะเลนบนหน้าจอ</p>`,'เริ่มเกม',newGame);
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
